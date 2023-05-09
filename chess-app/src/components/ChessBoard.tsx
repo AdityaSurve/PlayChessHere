@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import Tile from "./Tile";
 
 const horizontalAxis = ["a", "b", "c", "d", "e", "f", "g", "h"];
@@ -10,41 +10,47 @@ interface Piece {
   y: number;
 }
 
-const pieces: Piece[] = [];
-
+const initialBoardState: Piece[] = [];
 for (let p = 0; p < 2; p++) {
   const type = p === 0 ? "b" : "w";
   const y = p === 0 ? 7 : 0;
-  pieces.push({ image: `./assets/rook_${type}.png`, x: 0, y: y });
-  pieces.push({ image: `./assets/rook_${type}.png`, x: 7, y: y });
-  pieces.push({ image: `./assets/knight_${type}.png`, x: 1, y: y });
-  pieces.push({ image: `./assets/knight_${type}.png`, x: 6, y: y });
-  pieces.push({ image: `./assets/bishop_${type}.png`, x: 2, y: y });
-  pieces.push({ image: `./assets/bishop_${type}.png`, x: 5, y: y });
-  pieces.push({ image: `./assets/queen_${type}.png`, x: 3, y: y });
-  pieces.push({ image: `./assets/king_${type}.png`, x: 4, y: y });
+  initialBoardState.push({ image: `./assets/rook_${type}.png`, x: 0, y: y });
+  initialBoardState.push({ image: `./assets/rook_${type}.png`, x: 7, y: y });
+  initialBoardState.push({ image: `./assets/knight_${type}.png`, x: 1, y: y });
+  initialBoardState.push({ image: `./assets/knight_${type}.png`, x: 6, y: y });
+  initialBoardState.push({ image: `./assets/bishop_${type}.png`, x: 2, y: y });
+  initialBoardState.push({ image: `./assets/bishop_${type}.png`, x: 5, y: y });
+  initialBoardState.push({ image: `./assets/queen_${type}.png`, x: 3, y: y });
+  initialBoardState.push({ image: `./assets/king_${type}.png`, x: 4, y: y });
 }
 
 for (let i = 0; i < 8; i++) {
-  pieces.push({ image: "./assets/pawn_w.png", x: i, y: 1 });
-  pieces.push({ image: "./assets/pawn_b.png", x: i, y: 6 });
+  initialBoardState.push({ image: "./assets/pawn_w.png", x: i, y: 1 });
+  initialBoardState.push({ image: "./assets/pawn_b.png", x: i, y: 6 });
 }
 
 export default function ChessBoard() {
+  const [activePiece, setActivePiece] = useState<HTMLElement | null>(null);
+  const [gridx, setGridx] = useState(0);
+  const [gridy, setGridy] = useState(0);
+  const [pieces, setPieces] = useState<Piece[]>(initialBoardState);
   const chessboardRef = useRef<HTMLDivElement>(null);
-  let activePiece: HTMLElement | null = null;
 
   function grabPiece(e: React.MouseEvent) {
+    const chessboard = chessboardRef.current;
     const element = e.target as HTMLElement;
-    if (element.classList.contains("PIECE")) {
-      console.log("element");
+    if (element.classList.contains("PIECE") && chessboard) {
+      setGridx(Math.floor((e.clientX - chessboard.offsetLeft) / 75));
+      setGridy(
+        Math.abs(Math.ceil((e.clientY - chessboard.offsetTop - 600) / 75))
+      );
       const x = e.clientX - 37.5;
       const y = e.clientY - 37.5;
 
       element.style.position = "absolute";
       element.style.left = `${x}px`;
       element.style.top = `${y}px`;
-      activePiece = element;
+      setActivePiece(element);
     }
   }
   function movePiece(e: React.MouseEvent) {
@@ -74,8 +80,24 @@ export default function ChessBoard() {
     }
   }
   function dropPiece(e: React.MouseEvent) {
-    if (activePiece) {
-      activePiece = null;
+    const chessboard = chessboardRef.current;
+    if (activePiece && chessboard) {
+      const x = Math.floor((e.clientX - chessboard.offsetLeft) / 75);
+      const y = Math.abs(
+        Math.ceil((e.clientY - chessboard.offsetTop - 600) / 75)
+      );
+      console.log(x, y);
+      setPieces((value) => {
+        const pieces = value.map((p) => {
+          if (p.x === gridx && p.y === gridy) {
+            p.x = x;
+            p.y = y;
+          }
+          return p;
+        });
+        return pieces;
+      });
+      setActivePiece(null);
     }
   }
   let board = [];
