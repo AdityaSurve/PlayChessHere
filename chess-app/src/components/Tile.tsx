@@ -4,25 +4,25 @@ interface Props {
 }
 
 export default function Tile({ number, image }: Props) {
-  if (number % 2 === 0) {
-    return (
-      <div className="flex justify-center items-center bg-[#825A34] w-[40px] md:w-[75px] h-[40px] md:h-[75px]">
-        <img
-          src={image}
-          alt=""
-          className="h-[36px] md:h-[70px] w-[36px] md:w-[70px]"
+  const type = number % 2 === 0 ? "#825A34" : "#C29E65";
+  return (
+    <div
+      className="flex justify-center items-center w-[40px] md:w-[75px] h-[40px] md:h-[75px]"
+      style={{
+        backgroundColor: `${type}`,
+      }}
+    >
+      {image && (
+        <div
+          className="PIECE w-[40px] md:w-[75px] h-[40px] md:h-[75px] active:cursor-grabbing hover:cursor-grab"
+          style={{
+            backgroundImage: `url(${image})`,
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
+            backgroundSize: "100%",
+          }}
         />
-      </div>
-    );
-  } else {
-    return (
-      <div className="flex justify-center items-center bg-[#C29E65] w-[40px] md:w-[75px] h-[40px] md:h-[75px]">
-        <img
-          src={image}
-          alt=""
-          className="h-[36px] md:h-[70px] w-[36px] md:w-[70px]"
-        />
-      </div>
-    );
-  }
+      )}
+    </div>
+  );
 }
